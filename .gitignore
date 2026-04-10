@@ -1,0 +1,13 @@
+# Compiled Binary / Executable
+main
+a.out
+
+# Vs code Settigns
+.vscode/
+
+
+# Build folders
+/build
+/bin
+/out
+
