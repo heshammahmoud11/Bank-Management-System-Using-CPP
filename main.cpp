@@ -1,10 +1,12 @@
 #include<iostream>
 #include<limits>
 #include<vector>
+#include<fstream>
+#include<string>
 using namespace std;
 
 void showMainMenu(); 
-
+const string clientFile = "client.txt";
 //----------------------------- Back End -----------------------------
 
 struct stClient
@@ -68,6 +70,95 @@ stClient convertString2Record(string str)
     return client;
 }
 
+bool isAccountNumberExist(string accoutNum, string fileName)
+{
+    fstream myFile;
+    myFile.open(fileName, ios::in);
+
+    if(myFile.is_open())
+    {
+        stClient client;
+        string line;
+        while(getline(myFile, line))
+        {
+            client = convertString2Record(line); 
+            if(client.accountNumber == accoutNum)
+            {
+                myFile.close();
+                return true; 
+            }
+           
+        }
+        myFile.close();
+    }
+    return false ;
+}
+
+stClient readClientInfo()
+{
+    stClient client;
+    cout << "Enter Client Account Number: ";
+    getline(cin >> ws, client.accountNumber);
+
+    while(isAccountNumberExist(client.accountNumber, clientFile))
+    {
+        cout << "Client with [ " << client.accountNumber << " ] Already Exist, Please Enter another one\n";
+        getline(cin >> ws, client.accountNumber);
+    }
+
+    cout << "Enter Client Pin Code: ";
+    getline(cin, client.pinCode);
+    cout <<"Enter Client Name: ";
+    getline(cin, client.name);
+    cout <<"Enter Client Phone: ";
+    getline(cin, client.phone);
+    cout <<"Enter Client Balance: ";
+    cin >> client.balance;
+
+    return client;
+}
+
+// just take the line data and save it in file
+void saveLineData2File(string fileName,  string line)
+{
+    fstream myFile;
+    myFile.open(fileName, ios::out | ios::app); // save new data, without remove the exist data
+
+    if(myFile.is_open())
+    {
+        myFile << line << endl;
+        myFile.close();
+    }
+}
+
+void add_One_Client2File()
+{
+    // Enter New Client to add
+    stClient client = readClientInfo();
+    saveLineData2File(clientFile, convertRecord2String(client));
+}
+
+void add_All_Clients2File()
+{
+    char ans = 'n';
+        do
+        {
+            cout << "Adding New Client\n";
+            add_One_Client2File();
+            cout << "Client Added Successfully, Do you want to add more Clients? [Y/N]: ";
+            cin >> ans;
+        } while (tolower(ans) == 'y');
+}
+
+void showAddNewClientScreen()
+{
+    system("clear");
+    cout << "\n====================================\n";
+    cout << "\t Adding New client Screen";
+    cout << "\n====================================\n";
+    add_All_Clients2File();
+}
+ 
 // ---------------------------- Front End ------------------------------
 
 enum enMenuOptions
@@ -113,7 +204,8 @@ void showMainMenu()
 
 int main()
 {
-    showMainMenu();
+   // showMainMenu();
+ showAddNewClientScreen();
 
     return 0;
 }
