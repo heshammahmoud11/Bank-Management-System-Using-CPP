@@ -1,8 +1,72 @@
 #include<iostream>
 #include<limits>
+#include<vector>
 using namespace std;
 
 void showMainMenu(); 
+
+//----------------------------- Back End -----------------------------
+
+struct stClient
+{
+    string accountNumber;
+    string pinCode;
+    string name;
+    string phone;
+    double balance;
+    bool mark4delete = false;
+};
+
+vector<string> splitString(string str, string delim = "#//#")
+{
+    short pos = 0;
+    string word = "";
+
+    vector<string> vString;
+
+    while((pos = str.find(delim)) != string::npos)
+    {
+        word = str.substr(0, pos);
+        if(word != "")
+        {
+            vString.push_back(word);
+        }
+        str.erase(0, pos + delim.length());
+    }
+     // handle the last string after delimeter
+    if(str != "")
+       vString.push_back(str);
+
+    return vString;
+}
+
+string convertRecord2String(stClient client, string delim = "#//#")
+{
+    string word = "";
+
+    word += client.accountNumber + delim;
+    word += client.pinCode + delim;
+    word += client.name + delim;
+    word += client.phone + delim;
+    word += to_string(client.balance);
+
+    return word;
+}
+
+stClient convertString2Record(string str)
+{
+    // Split string first
+    vector<string> vString = splitString(str, "#//#");
+    stClient client;
+
+    client.accountNumber = vString[0];
+    client.pinCode = vString[1];
+    client.name = vString[2];
+    client.phone = vString[3];
+    client.balance = stoi(vString[4]);
+
+    return client;
+}
 
 // ---------------------------- Front End ------------------------------
 
@@ -26,6 +90,8 @@ short chooseOption()
 {
     short num;
     cout << "Choose What do you want to do ? [1 : 8] : ";
+    cin >> num;
+    return num;
 }
 
 void showMainMenu()
