@@ -1,8 +1,8 @@
 #include<iostream>
 #include<limits>
 #include<vector>
+#include<iomanip>
 #include<fstream>
-#include<string>
 using namespace std;
 
 void showMainMenu(); 
@@ -131,6 +131,28 @@ void saveLineData2File(string fileName,  string line)
     }
 }
 
+vector<stClient> loadClientData_from_File(string fileName)
+{
+    vector<stClient> vClient;
+    fstream myFile;
+    myFile.open(fileName, ios::in); // Get Client From File and put them in vector of struct
+
+    if(myFile.is_open())
+    {
+        string line;
+        stClient client;
+
+        while(getline(myFile, line))
+        {
+            client = convertString2Record(line);
+            vClient.push_back(client);
+        }
+        myFile.close();
+    }
+
+    return vClient;
+}
+
 void add_One_Client2File()
 {
     // Enter New Client to add
@@ -150,6 +172,38 @@ void add_All_Clients2File()
         } while (tolower(ans) == 'y');
 }
 
+void print_One_Client(stClient client)
+{
+    cout << "| " << left << setw(15) << client.accountNumber;
+    cout << "| " << left << setw(10) << client.pinCode;
+    cout << "| " << left << setw(30) << client.name;
+    cout << "| " << left << setw(15) << client.phone;
+    cout << "| " << left << setw(10) << client.balance;
+}
+
+void print_All_Clients()
+{
+    vector<stClient> vClient = loadClientData_from_File(clientFile);
+
+    cout << "\n\t The Client Size [ " << vClient.size() << " ] Client(s)\n";
+    cout << "\n-----------------------------------------------------------";
+    cout << "-------------------------------------------\n";
+    cout << "| " << left << setw(15) << "Account Number";
+    cout << "| " << left << setw(10) << "Pin Code";
+    cout << "| " << left << setw(30) << "Client Name";
+    cout << "| " << left << setw(15) << "Client Phone";
+    cout << "| " << left << setw(10) << "Client Balance";
+    cout << "\n-----------------------------------------------------------";
+    cout << "--------------------------------------------\n";
+    for(stClient & c : vClient)
+    {
+        print_One_Client(c);
+        cout << endl;
+    }
+    cout << "-----------------------------------------------------------";
+    cout << "--------------------------------------------\n";
+}
+
 void showAddNewClientScreen()
 {
     system("clear");
@@ -158,7 +212,18 @@ void showAddNewClientScreen()
     cout << "\n====================================\n";
     add_All_Clients2File();
 }
- 
+
+void showAllClientsScreen()
+{
+    system("clear");
+    cout << "\n====================================\n";
+    cout << "\t Show All clients Screen";
+    cout << "\n====================================\n";
+
+    print_All_Clients();
+
+}
+
 // ---------------------------- Front End ------------------------------
 
 enum enMenuOptions
@@ -204,8 +269,9 @@ void showMainMenu()
 
 int main()
 {
-   // showMainMenu();
- showAddNewClientScreen();
+ // showMainMenu();
+ //showAddNewClientScreen();
+ showAllClientsScreen();
 
     return 0;
 }
