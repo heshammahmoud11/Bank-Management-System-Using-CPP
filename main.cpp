@@ -153,6 +153,17 @@ vector<stClient> loadClientData_from_File(string fileName)
     return vClient;
 }
 
+void printClientRecord(stClient client)
+{
+    cout << "\n### Client Record Info ###\n";
+    cout << "Client Account Number : " << client.accountNumber << endl;
+    cout << "Client Pin Code : " << client.pinCode << endl ;
+    cout << "Client Name : " << client.name << endl;
+    cout << "Client Phone : " << client.phone << endl;
+    cout << "Client Balance: " << client.balance << endl;
+
+}
+
 void add_One_Client2File()
 {
     // Enter New Client to add
@@ -185,7 +196,7 @@ void print_All_Clients()
 {
     vector<stClient> vClient = loadClientData_from_File(clientFile);
 
-    cout << "\n\t The Client Size [ " << vClient.size() << " ] Client(s)\n";
+    cout << "\n\t\t\t\t The Client Size [ " << vClient.size() << " ] Client(s)\n";
     cout << "\n-----------------------------------------------------------";
     cout << "-------------------------------------------\n";
     cout << "| " << left << setw(15) << "Account Number";
@@ -202,6 +213,27 @@ void print_All_Clients()
     }
     cout << "-----------------------------------------------------------";
     cout << "--------------------------------------------\n";
+}
+
+string getAccountNumber()
+{
+    string str;
+    cout <<"Enter Client Account Number: ";
+    cin >> str;
+    return str;
+}
+
+bool findClient_by_AccountNumber(string accountNumber, vector<stClient> vClient, stClient &client)
+{
+    for(stClient & c : vClient)
+    {
+        if(c.accountNumber == accountNumber)
+        {
+            client = c;
+            return true;
+        }
+    }
+    return false ; 
 }
 
 void showAddNewClientScreen()
@@ -222,6 +254,23 @@ void showAllClientsScreen()
 
     print_All_Clients();
 
+}
+
+void showFindClientByAccountNumberScreen()
+{
+    system("clear");
+    cout << "\n===================================================\n";
+    cout << "\t Find Client By Account Number Screen";
+    cout << "\n===================================================\n";
+
+    string accountNum = getAccountNumber();
+    vector<stClient> vClient = loadClientData_from_File(clientFile);
+    stClient client; 
+
+    if(findClient_by_AccountNumber(accountNum, vClient, client))
+        printClientRecord(client);
+    else
+        cout <<"Client With Account Number [ " << accountNum << " ] is Not Found!\n";
 }
 
 // ---------------------------- Front End ------------------------------
@@ -271,7 +320,8 @@ int main()
 {
  // showMainMenu();
  //showAddNewClientScreen();
- showAllClientsScreen();
+ //showAllClientsScreen();
+ showFindClientByAccountNumberScreen();
 
     return 0;
 }
