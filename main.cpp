@@ -65,7 +65,7 @@ stClient convertString2Record(string str)
     client.pinCode = vString[1];
     client.name = vString[2];
     client.phone = vString[3];
-    client.balance = stoi(vString[4]);
+    client.balance = stod(vString[4]);
 
     return client;
 }
@@ -75,10 +75,12 @@ bool isAccountNumberExist(string accoutNum, string fileName)
     fstream myFile;
     myFile.open(fileName, ios::in);
 
+
     if(myFile.is_open())
     {
         stClient client;
         string line;
+
         while(getline(myFile, line))
         {
             client = convertString2Record(line); 
@@ -97,12 +99,14 @@ bool isAccountNumberExist(string accoutNum, string fileName)
 stClient readClientInfo()
 {
     stClient client;
+
     cout << "Enter Client Account Number: ";
     getline(cin >> ws, client.accountNumber);
 
     while(isAccountNumberExist(client.accountNumber, clientFile))
     {
         cout << "Client with [ " << client.accountNumber << " ] Already Exist, Please Enter another one\n";
+        cout << "Enter Account Number: ";
         getline(cin >> ws, client.accountNumber);
     }
 
@@ -135,6 +139,7 @@ vector<stClient> loadClientData_from_File(string fileName)
 {
     vector<stClient> vClient;
     fstream myFile;
+
     myFile.open(fileName, ios::in); // Get Client From File and put them in vector of struct
 
     if(myFile.is_open())
@@ -178,8 +183,9 @@ void add_All_Clients2File()
         {
             cout << "Adding New Client\n";
             add_One_Client2File();
-            cout << "Client Added Successfully, Do you want to add more Clients? [Y/N]: ";
+            cout << "\nClient Added Successfully, Do you want to add more Clients? [Y/N]: ";
             cin >> ans;
+            cin.ignore();
         } while (tolower(ans) == 'y');
 }
 
@@ -236,9 +242,76 @@ bool findClient_by_AccountNumber(string accountNumber, vector<stClient> vClient,
     return false ; 
 }
 
+bool markClient4Delete(string accountNum, vector<stClient> &vClient)
+{
+    for(stClient & c: vClient)
+    {
+        if(c.accountNumber == accountNum)
+        {
+            c.mark4delete = true;
+            return true;
+        }
+    }
+    return false;
+}
+
+vector<stClient> saveClientData2File(string fileName, vector<stClient> vClient)
+{
+    fstream myFile;
+    myFile.open(fileName, ios::out); // delete all clients , save new ones
+
+
+    if(myFile.is_open())
+    {
+        string line ;
+
+        for(stClient & c : vClient)
+        {
+            if(c.mark4delete == false)
+            {
+                line = convertRecord2String(c); 
+                myFile << line << endl;
+            }
+        }
+        myFile.close();
+    }
+
+    return vClient; // File Now is clean, but vector still containing all clients (incude marked)
+}
+
+bool deleteClient_by_AccountNumber(string accountNum, vector<stClient> & vClient)
+{
+    char ans = 'n';
+    stClient client;
+
+    if(findClient_by_AccountNumber(accountNum, vClient, client))
+    {
+        printClientRecord(client);
+        cout << "\n\033[91m Do You want to Delete This Client? [Y/N]: ";
+        cin >> ans;
+        if(tolower(ans) == 'y')
+        {
+            markClient4Delete(accountNum, vClient);
+            // save all clients except the marked one.
+            saveClientData2File(clientFile, vClient);
+            // refresh the screen using new client in file
+            // Update The vector with new clients
+            vClient = loadClientData_from_File(clientFile);
+            cout << "\nClient Deleted Successfully\n";
+            return true;
+        }
+       return false;
+    }else
+    {
+        cout << "Client with Account Number [ " << accountNum <<" ] Not Found!\n";
+        return false;
+    }
+}
+
 void showAddNewClientScreen()
 {
     system("clear");
+    cout << "\033[92m";
     cout << "\n====================================\n";
     cout << "\t Adding New client Screen";
     cout << "\n====================================\n";
@@ -248,6 +321,8 @@ void showAddNewClientScreen()
 void showAllClientsScreen()
 {
     system("clear");
+   cout << "\033[93m";
+    cout << "\033[1m";
     cout << "\n====================================\n";
     cout << "\t Show All clients Screen";
     cout << "\n====================================\n";
@@ -271,6 +346,19 @@ void showFindClientByAccountNumberScreen()
         printClientRecord(client);
     else
         cout <<"Client With Account Number [ " << accountNum << " ] is Not Found!\n";
+}
+
+void showDeleteClientScreen()
+{
+    system("clear");
+    cout << "\n===================================================\n";
+    cout << "\t Delete Client Screen";
+    cout << "\n===================================================\n";
+
+    string accountNum = getAccountNumber();
+    vector<stClient> vClient = loadClientData_from_File(clientFile);
+
+    deleteClient_by_AccountNumber(accountNum, vClient);
 }
 
 // ---------------------------- Front End ------------------------------
@@ -297,20 +385,22 @@ short chooseOption()
     cout << "Choose What do you want to do ? [1 : 8] : ";
     cin >> num;
     return num;
-}
+} 
 
 void showMainMenu()
-{
+{ 
     system("clear");
+    cout << "\033[96m";
+    cout << "\033[1m";
     cout <<"===============================================\n";
     cout <<"\t\t Main Menu Screen\n";
     cout <<"===============================================\n";
     cout << "\t[1] Show Client List.\n";
     cout << "\t[2] Add New Client.\n";
     cout << "\t[3] Delete Client.\n";
-    cout << "\t[4] Update Client Info.\n";
+    cout << "\t[4] Update Client Info.\n"; 
     cout << "\t[5] Find Client.\n";
-    cout << "\t[6] Transactions.\n";
+    cout << "\t[6] Transactions.\n"; 
     cout << "\t[7] Manage Users.\n";
     cout << "\t[8] Logout.\n";
     cout <<"===============================================\n";
@@ -318,10 +408,27 @@ void showMainMenu()
 
 int main()
 {
- // showMainMenu();
- //showAddNewClientScreen();
- //showAllClientsScreen();
- showFindClientByAccountNumberScreen();
+//   showMainMenu();
+//  showAddNewClientScreen();
+//  showAllClientsScreen();
+// showFindClientByAccountNumberScreen();
+//  showDeleteClientScreen();
 
     return 0;
 }
+
+
+/*  
+
+--------------- Linux system color code -----------
+const string RESET   = "\033[0m";
+const string RED     = "\033[91m";
+const string GREEN   = "\033[92m";
+const string YELLOW  = "\033[93m";
+const string BLUE    = "\033[94m";
+const string CYAN    = "\033[96m";
+const string WHITE   = "\033[97m";
+const string BOLD    = "\033[1m";
+
+
+*/
