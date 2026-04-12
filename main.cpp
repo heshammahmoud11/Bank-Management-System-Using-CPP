@@ -308,6 +308,57 @@ bool deleteClient_by_AccountNumber(string accountNum, vector<stClient> & vClient
     }
 }
 
+stClient changeClientRecord(string accountNum)
+{
+    stClient client;
+
+    client.accountNumber = accountNum;
+
+    cout << "Enter Client Pin Code: ";
+    getline(cin >> ws, client.pinCode);
+    cout << "Enter Client Name: ";
+    getline(cin, client.name);
+    cout << "Enter Client Phone: ";
+    getline(cin, client.phone);
+    cout << "Enter Client Balance: ";
+    cin >> client.balance;
+
+    return client;
+}
+
+bool updateClient_by_AccountNumber(string accountNum, vector<stClient> & vClient)
+{
+    char ans = 'n'; 
+    stClient client;
+
+    if(findClient_by_AccountNumber(accountNum, vClient, client))
+    {
+        printClientRecord(client);
+        cout << "\nDo You Want to UPdate this Client ? [Y/N]: ";
+        cin >> ans;
+        if(tolower(ans) == 'y') 
+        {
+            for(stClient & c : vClient)  
+            {
+                if(c.accountNumber == accountNum)
+                {
+                    c = changeClientRecord(accountNum);
+                    break;
+                }
+            }
+            saveClientData2File(clientFile, vClient);
+            vClient = loadClientData_from_File(clientFile);
+            cout << "\n Client Updated Successfully\n";
+            return true; 
+        }
+        return false;
+    }else
+    {
+        cout <<"Client with Account number [ " << accountNum << " ] not found\n"; 
+        return false; 
+    }
+}
+
 void showAddNewClientScreen()
 {
     system("clear");
@@ -358,9 +409,23 @@ void showDeleteClientScreen()
     string accountNum = getAccountNumber();
     vector<stClient> vClient = loadClientData_from_File(clientFile);
 
-    deleteClient_by_AccountNumber(accountNum, vClient);
+    deleteClient_by_AccountNumber(accountNum, vClient);   
+
 }
 
+void showUpdateClientScreen()
+{
+    system("clear");
+    cout << "\n===================================================\n";
+    cout << "\t Update Client Screen";
+    cout << "\n===================================================\n";
+
+    string accountNum = getAccountNumber();
+    vector<stClient> vClient = loadClientData_from_File(clientFile);
+
+    updateClient_by_AccountNumber(accountNum, vClient);
+
+}
 // ---------------------------- Front End ------------------------------
 
 enum enMenuOptions
@@ -413,6 +478,7 @@ int main()
 //  showAllClientsScreen();
 // showFindClientByAccountNumberScreen();
 //  showDeleteClientScreen();
+showUpdateClientScreen();
 
     return 0;
 }
